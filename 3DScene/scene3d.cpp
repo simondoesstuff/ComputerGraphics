@@ -25,7 +25,8 @@
 #include "hsv2rgb.cpp"
 #include "geometry.cpp"
 
-struct orbit {
+struct orbit
+{
    float pitch = 0;
    float yaw = 0;
    const float speed = 10;
@@ -61,7 +62,7 @@ void draw()
       //----------------- Axis
       glColor3f(.3, .3, .3);
       //  Draw axes
-      const double len = 1.5; //  Length of axes
+      const double len = 1; //  Length of axes
       glBegin(GL_LINES);
       glVertex3d(0.0, 0.0, 0.0);
       glVertex3d(len, 0.0, 0.0);
@@ -78,53 +79,53 @@ void draw()
       glRasterPos3d(0.0, 0.0, len);
       Print("Z");
    }
-   
+
    {
       // ----------------- Extrusion
-      
-      Vec3 c;
-      
-      c = {.3, 1, .5};
-      auto prism = Polygon({
-         {0, 0, 0},
-         {1, 0, 0},
-         {1, 0, 1},
-         {.3, 0, 1.3},
-         {0, 0, 1},
-      }, c).extrude({.25, 1, .2});
 
-      prism.varigatePaint(.25);
-      prism.draw();
-      
-      c = {.9, .2, .8};
-      prism = Polygon({
-         {0, 0, 0},
-         {0, 0, 1},
-         {0, 1, 1},
-         {0, 1, 0},
-      }, c).extrude({2.5, 1, 0});
-      
-      glPushMatrix();
-      prism.varigatePaint(.25);
-      glScalef(.7, .7, .7);
-      glTranslatef(0, 0, -.25);
-      prism.draw();
-      glPopMatrix();
-      
-      c = {.7, .7, 1};
-      prism = Polygon({
-         {0, 0, 0},
-         {1, 0, 0},
-         {1, 0, 1},
-         {0, 0, 1},
-      }, c).extrude({0, 1, 0});
-      
-      glPushMatrix();
-      prism.varigatePaint(.25);
-      glScalef(3, .5, 3);
-      glTranslatef(-.5, .25, -.5);
-      prism.draw();
-      glPopMatrix();
+      // Vec3 c;
+
+      // c = {.3, 1, .5};
+      // auto prism = Polygon({
+      //    {0, 0, 0},
+      //    {1, 0, 0},
+      //    {1, 0, 1},
+      //    {.3, 0, 1.3},
+      //    {0, 0, 1},
+      // }, c).extrude({.25, 1, .2});
+
+      // prism.varigatePaint(.25);
+      // prism.draw();
+
+      // c = {.9, .2, .8};
+      // prism = Polygon({
+      //    {0, 0, 0},
+      //    {0, 0, 1},
+      //    {0, 1, 1},
+      //    {0, 1, 0},
+      // }, c).extrude({2.5, 1, 0});
+
+      // glPushMatrix();
+      // prism.varigatePaint(.25);
+      // glScalef(.7, .7, .7);
+      // glTranslatef(0, 0, -.25);
+      // prism.draw();
+      // glPopMatrix();
+
+      auto cube = Polygon({
+                              {0, 0, 0},
+                              {1, 0, 0},
+                              {1, 0, 1},
+                              {0, 0, 1},
+                          },
+                          {.7, .7, 1})
+                      .extrude({0, 1, 0})
+                      .varigatePaint(.25);
+
+      Box({&cube})
+          .scale({.5, .5, .5})
+          .move({0, -.5, 0})
+          .draw();
    }
 
    glutSwapBuffers();
@@ -132,7 +133,8 @@ void draw()
 }
 
 // -------- Idle Hook -------- //
-void idle() {
+void idle()
+{
 }
 
 // -------- Window Reshape -------- //
@@ -154,7 +156,8 @@ void reshape(int width, int height)
    glLoadIdentity();
 }
 
-void key(unsigned char ch, int x, int y) {
+void key(unsigned char ch, int x, int y)
+{
 }
 
 // -------- Special -------- //
@@ -209,7 +212,7 @@ int main(int argc, char *argv[])
       exit(1);
    }
 #endif
-   
+
    //  Request double buffered, true color window with Z buffering at 600x600
    glutInitWindowSize(600, 600);
    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
@@ -218,8 +221,8 @@ int main(int argc, char *argv[])
 
    //  Enable Z-buffering in OpenGL
    glEnable(GL_DEPTH_TEST);
-   glDepthFunc(GL_LESS);  
-   
+   glDepthFunc(GL_LESS);
+
    // Enable face culling
    glEnable(GL_CULL_FACE);
    glCullFace(GL_BACK);

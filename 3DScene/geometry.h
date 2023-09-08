@@ -1,4 +1,5 @@
 #include <vector>
+#include <initializer_list>
 
 struct Vec3 {
     float x, y, z;
@@ -10,11 +11,20 @@ struct Vec3 {
     Vec3 operator/(float scalar);
     float magnitude();
     Vec3 normalized();
+    Vec3 multComps(Vec3 other);
+    Vec3 reciprocal();
+};
+
+struct BoundingBox {
+    Vec3 min, max;
+    Vec3 center();
+    Vec3 size();
 };
 
 struct Drawable {
     virtual void draw() = 0;
     virtual ~Drawable() {};
+    virtual BoundingBox bounds() = 0;
 };
 
 class Prism;
@@ -34,6 +44,7 @@ struct Polygon : public Drawable {
     Polygon operator/(float scalar);
     Prism extrude(Vec3 extrusion);
     void draw();
+    BoundingBox bounds();
 };
 
 class Prism : public Drawable {
@@ -41,10 +52,28 @@ class Prism : public Drawable {
         Prism(Polygon base, Vec3 extrusion, Vec3 color);
         Prism(Polygon base, Vec3 extrusion);
         int size();
-        void paint(std::vector<Vec3> colors);
-        void varigatePaint(float strength);
+        Prism painted(std::vector<Vec3> colors);
+        Prism varigatePaint(float strength);
         void draw();
         std::vector<Polygon> getPolygons();
+        BoundingBox bounds();
     private:
         std::vector<Polygon> polygons;
+};
+
+class Box : public Drawable {
+    private:
+        float matrix[16];
+
+    public:
+        std::vector<Drawable*> children;
+        
+        Box(std::vector<Drawable*> children);
+        Box(std::initializer_list<Drawable*> children);
+        void identity();
+        BoundingBox bounds();
+        void draw();
+        Box scale(Vec3 scale);
+        Box move(Vec3 pos);
+        Box rotate(Vec3 rot);
 };
