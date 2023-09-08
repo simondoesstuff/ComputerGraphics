@@ -6,4 +6,4 @@
 because I misunderstood $(i + 1 ~~\%~~ n)$ as $(i + 1) ~~\%~~ n$ when
 it is actually $i + (1 ~~\%~~ n)$.
 
-![](./3dSolids.mov)
+![](./solids.gif)

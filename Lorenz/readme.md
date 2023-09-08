@@ -2,7 +2,7 @@
 > 9/6/2023  
 > Lorenz Attractor
 
-
+![](./demo.gif)
 
 # Build
 
