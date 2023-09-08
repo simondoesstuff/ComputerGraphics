@@ -64,6 +64,7 @@ class Prism : public Drawable {
 class Box : public Drawable {
     private:
         float matrix[16];
+        Vec3 scaleFactor = {1, 1, 1};
 
     public:
         std::vector<Drawable*> children;

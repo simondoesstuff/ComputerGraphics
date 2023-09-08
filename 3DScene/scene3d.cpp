@@ -123,6 +123,7 @@ void draw()
                       .varigatePaint(.25);
 
       Box({&cube})
+          .move({1, 0, 1})
           .scale({.5, .5, .5})
           .move({0, -.5, 0})
           .draw();

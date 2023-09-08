@@ -246,6 +246,8 @@ void Box::identity() {
     for (int i = 0; i < 16; i++) {
         this->matrix[i] = matrix[i];
     }
+    
+    this->scaleFactor = {1, 1, 1};
 }
 
 BoundingBox Box::bounds() {
@@ -289,10 +291,12 @@ Box Box::scale(Vec3 scale) {
     glScalef(scale.x, scale.y, scale.z);
     glGetFloatv(GL_MODELVIEW_MATRIX, this->matrix);
     glPopMatrix();
+    this->scaleFactor = this->scaleFactor.multComps(scale);
     return *this;
 }
 
 Box Box::move(Vec3 pos) {
+    pos = pos.multComps(this->scaleFactor.reciprocal());
     glPushMatrix();
     glLoadMatrixf(this->matrix);
     glTranslatef(pos.x, pos.y, pos.z);
