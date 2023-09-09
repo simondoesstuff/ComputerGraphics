@@ -13,60 +13,74 @@
 
 // ------ BoundingBox ------ //
 
-Vec3 BoundingBox::center() {
+Vec3 BoundingBox::center()
+{
     return (min + max) / 2;
 }
 
-Vec3 BoundingBox::size() {
+Vec3 BoundingBox::size()
+{
     return max - min;
 }
 
 // ---- Vec3 ---- //
 
-Vec3 Vec3::operator+(Vec3 other) {
+Vec3 Vec3::operator+(Vec3 other)
+{
     return {x + other.x, y + other.y, z + other.z};
 };
 
-Vec3 Vec3::operator+(float scalar) {
+Vec3 Vec3::operator+(float scalar)
+{
     return {x + scalar, y + scalar, z + scalar};
 };
 
-Vec3 Vec3::operator-(Vec3 other) {
+Vec3 Vec3::operator-(Vec3 other)
+{
     return {x - other.x, y - other.y, z - other.z};
 };
 
-Vec3 Vec3::operator-(float scalar) {
+Vec3 Vec3::operator-(float scalar)
+{
     return {x - scalar, y - scalar, z - scalar};
 };
 
-Vec3 Vec3::operator*(float scalar) {
+Vec3 Vec3::operator*(float scalar)
+{
     return {x * scalar, y * scalar, z * scalar};
 };
 
-Vec3 Vec3::operator/(float scalar) {
+Vec3 Vec3::operator/(float scalar)
+{
     return {x / scalar, y / scalar, z / scalar};
 };
 
-Vec3 Vec3::multComps(Vec3 other) {
+Vec3 Vec3::multComps(Vec3 other)
+{
     return {x * other.x, y * other.y, z * other.z};
 };
 
-float Vec3::magnitude() {
+float Vec3::magnitude()
+{
     return sqrt(x * x + y * y + z * z);
 };
 
-Vec3 Vec3::normalized() {
+Vec3 Vec3::normalized()
+{
     return *this / magnitude();
 };
 
-Vec3 Vec3::reciprocal() {
+Vec3 Vec3::reciprocal()
+{
     return {1 / x, 1 / y, 1 / z};
 };
 
 // ---- Polygon ---- //
 
-Polygon::Polygon(std::vector<Vec3> vertices, Vec3 color) {
-    if (vertices.size() < 3) {
+Polygon::Polygon(std::vector<Vec3> vertices, Vec3 color)
+{
+    if (vertices.size() < 3)
+    {
         throw "Polygon must have at least 3 verticies";
     }
 
@@ -77,215 +91,264 @@ Polygon::Polygon(std::vector<Vec3> vertices, Vec3 color) {
 
 Polygon::Polygon(std::vector<Vec3> vertices) : Polygon(vertices, {1, 1, 1}) {}
 
-Polygon Polygon::operator+(Vec3 other) {
+Polygon Polygon::operator+(Vec3 other)
+{
     auto verticiesNext = std::vector<Vec3>();
-    for (Vec3 vertex : verticies) {
+    for (Vec3 vertex : verticies)
+    {
         verticiesNext.push_back(vertex + other);
     }
     return Polygon(verticiesNext, color);
 }
 
-Polygon Polygon::operator+(float scalar) {
+Polygon Polygon::operator+(float scalar)
+{
     auto verticiesNext = std::vector<Vec3>();
-    for (Vec3 vertex : verticies) {
+    for (Vec3 vertex : verticies)
+    {
         verticiesNext.push_back(vertex + scalar);
     }
     return Polygon(verticiesNext, color);
 }
 
-Polygon Polygon::operator-(Vec3 other) {
+Polygon Polygon::operator-(Vec3 other)
+{
     return *this + ((other) * -1);
 }
 
-Polygon Polygon::operator-(float scalar) {
+Polygon Polygon::operator-(float scalar)
+{
     return *this + ((scalar) * -1);
 }
 
-Polygon Polygon::reversed() {
+Polygon Polygon::reversed()
+{
     auto verticiesNext = std::vector<Vec3>();
-    for (int i = verticies.size() - 1; i >= 0; i--) {
+    for (int i = verticies.size() - 1; i >= 0; i--)
+    {
         verticiesNext.push_back(verticies[i]);
     }
     return Polygon(verticiesNext, color);
 }
 
-Prism Polygon::extrude(Vec3 extrusion) {
+Prism Polygon::extrude(Vec3 extrusion)
+{
     return Prism(*this, extrusion);
 }
 
-BoundingBox Polygon::bounds() {
+BoundingBox Polygon::bounds()
+{
     auto min = Vec3{INFINITY, INFINITY, INFINITY};
     auto max = Vec3{-INFINITY, -INFINITY, -INFINITY};
-    
-    for (Vec3 vertex : verticies) {
+
+    for (Vec3 vertex : verticies)
+    {
         min.x = std::min(min.x, vertex.x);
         min.y = std::min(min.y, vertex.y);
         min.z = std::min(min.z, vertex.z);
-        
+
         max.x = std::max(max.x, vertex.x);
         max.y = std::max(max.y, vertex.y);
         max.z = std::max(max.z, vertex.z);
     }
-    
-    return BoundingBox {min, max};
+
+    return BoundingBox{min, max};
 }
 
-void Polygon::draw() {
+void Polygon::draw()
+{
     glColor3f(color.x, color.y, color.z);
     glBegin(GL_POLYGON);
-    for (Vec3 vertex : verticies) {
+    for (Vec3 vertex : verticies)
+    {
         glVertex3f(vertex.x, vertex.y, vertex.z);
     }
     glEnd();
 }
 
-// ---- Prism ---- //
+// ---- Frustum ---- //
 
-Prism::Prism(Polygon base, Vec3 extrusion, Vec3 color) {
-    base.color = color;
-    polygons.push_back(base);
+Frustum::Frustum(Polygon base1, Polygon base2, Vec3 color)
+{
+    if (base1.verticies.size() != base2.verticies.size())
+    {
+        throw "Base polygons must have the same number of verticies";
+    }
     
-    int n = base.verticies.size();
-    for (int i = 0; i < n; i++) {
+    base1.color = color;
+    polygons.push_back(base1);
+
+    int n = base1.verticies.size();
+    for (int i = 0; i < n; i++)
+    {
         auto verticies = std::vector<Vec3>();
-        
-        verticies.push_back(base.verticies[i]);
-        verticies.push_back(base.verticies[i] + extrusion);
-        verticies.push_back(base.verticies[(i+1) % n] + extrusion);
-        verticies.push_back(base.verticies[(i+1) % n]);
-        
+
+        int i2 = (i + 1) % n;
+        int j = n - i - 1;
+        int j2 = j == 0 ? n - 1 : j - 1;
+
+        verticies.push_back(base1.verticies[i]);
+        verticies.push_back(base2.verticies[j]);
+        verticies.push_back(base2.verticies[j2]);
+        verticies.push_back(base1.verticies[i2]);
+
         Polygon face = Polygon(verticies, color);
         polygons.push_back(face);
     }
-    
-    polygons.push_back(base.reversed() + extrusion);
+
+    polygons.push_back(base2);
 }
 
-Prism::Prism(Polygon base, Vec3 extrusion) : Prism(base, extrusion, base.color) {}
+Frustum::Frustum(Polygon base1, Polygon base2) : Frustum(base1, base2, base1.color) {}
 
-int Prism::size() {
+int Frustum::size()
+{
     return polygons.size();
 }
 
-Prism Prism::painted(std::vector<Vec3> colors) {
-    for (int i = 0; i < polygons.size(); i++) {
+Frustum Frustum::painted(std::vector<Vec3> colors)
+{
+    for (int i = 0; i < polygons.size(); i++)
+    {
         auto color = colors[i % colors.size()];
         polygons[i].color = color;
     }
-    
+
     return *this;
 }
 
 /// @brief Dim brightness slightly according to polygon index
-/// @param strength 
-Prism Prism::varigatePaint(float strength) {
-    for (int i = 0; i < polygons.size(); i++) {
+/// @param strength
+Frustum Frustum::varigatePaint(float strength)
+{
+    for (int i = 0; i < polygons.size(); i++)
+    {
         auto color = polygons[i].color;
         auto brightness = (i / (float)polygons.size()) * strength;
         polygons[i].color = (color - strength) + brightness;
     }
-    
+
     return *this;
 }
 
-void Prism::draw() {
-    for (int i = 0; i < polygons.size(); i++) {
+void Frustum::draw()
+{
+    for (int i = 0; i < polygons.size(); i++)
+    {
         polygons[i].draw();
     }
 }
 
-std::vector<Polygon> Prism::getPolygons() {
+std::vector<Polygon> Frustum::getPolygons()
+{
     return polygons;
 }
 
-BoundingBox Prism::bounds() {
+BoundingBox Frustum::bounds()
+{
     auto min = Vec3{INFINITY, INFINITY, INFINITY};
     auto max = Vec3{-INFINITY, -INFINITY, -INFINITY};
-    
-    for (Polygon polygon : polygons) {
-        auto polyBounds= polygon.bounds();
+
+    for (Polygon polygon : polygons)
+    {
+        auto polyBounds = polygon.bounds();
         auto polyMin = polyBounds.min;
         auto polyMax = polyBounds.max;
-        
+
         min.x = std::min(min.x, polyMin.x);
         min.y = std::min(min.y, polyMin.y);
         min.z = std::min(min.z, polyMin.z);
-        
+
         max.x = std::max(max.x, polyMax.x);
         max.y = std::max(max.y, polyMax.y);
         max.z = std::max(max.z, polyMax.z);
     }
-    
-    return BoundingBox {min, max};
+
+    return BoundingBox{min, max};
 }
+
+// --------- Prism --------- //
+
+Prism::Prism(Polygon base, Vec3 extrusion) : Frustum(base, base.reversed() + extrusion) {}
+Prism::Prism(Polygon base1, Vec3 extrusion, Vec3 color) : Frustum(base1, base1.reversed() + extrusion, color) {}
 
 // -------- Box -------- //
 
 // container
-Box::Box(std::vector<Drawable*> children) {
+Box::Box(std::vector<Drawable *> children)
+{
     this->children = children;
     this->identity();
 }
 
-Box::Box(std::initializer_list<Drawable*> children) {
-    this->children = std::vector<Drawable*>();
-    for (Drawable* child : children) {
+Box::Box(std::initializer_list<Drawable *> children)
+{
+    this->children = std::vector<Drawable *>();
+    for (Drawable *child : children)
+    {
         this->children.push_back(child);
     }
     this->identity();
 }
 
-void Box::identity() {
+void Box::identity()
+{
     float matrix[16] = {
         1, 0, 0, 0, // x
         0, 1, 0, 0, // y
         0, 0, 1, 0, // z
         0, 0, 0, 1, // w
     };
-    
-    for (int i = 0; i < 16; i++) {
+
+    for (int i = 0; i < 16; i++)
+    {
         this->matrix[i] = matrix[i];
     }
-    
+
     this->scaleFactor = {1, 1, 1};
 }
 
-BoundingBox Box::bounds() {
+BoundingBox Box::bounds()
+{
     auto min = Vec3{INFINITY, INFINITY, INFINITY};
     auto max = Vec3{-INFINITY, -INFINITY, -INFINITY};
-    
-    for (Drawable* child : children) {
+
+    for (Drawable *child : children)
+    {
         auto bounds = child->bounds();
         auto childMin = bounds.min;
         auto childMax = bounds.max;
-        
+
         min.x = std::min(min.x, childMin.x);
         min.y = std::min(min.y, childMin.y);
         min.z = std::min(min.z, childMin.z);
-        
+
         max.x = std::max(max.x, childMax.x);
         max.y = std::max(max.y, childMax.y);
         max.z = std::max(max.z, childMax.z);
     }
-    
-    return BoundingBox {min, max};
+
+    return BoundingBox{min, max};
 }
 
-void Box::draw() {
+void Box::draw()
+{
     glPushMatrix();
 
     glMultMatrixf(this->matrix);
     auto size = this->bounds().size();
     glTranslatef(-size.x / 2, -size.y / 2, -size.z / 2);
-    
-    for (Drawable* child : children) {
+
+    for (Drawable *child : children)
+    {
         child->draw();
     }
-    
+
     glPopMatrix();
 }
 
-Box Box::scale(Vec3 scale) {
+Box Box::scale(Vec3 scale)
+{
     glPushMatrix();
     glLoadMatrixf(this->matrix);
     glScalef(scale.x, scale.y, scale.z);
@@ -295,7 +358,8 @@ Box Box::scale(Vec3 scale) {
     return *this;
 }
 
-Box Box::move(Vec3 pos) {
+Box Box::move(Vec3 pos)
+{
     pos = pos.multComps(this->scaleFactor.reciprocal());
     glPushMatrix();
     glLoadMatrixf(this->matrix);
@@ -305,7 +369,8 @@ Box Box::move(Vec3 pos) {
     return *this;
 }
 
-Box Box::rotate(Vec3 rot) {
+Box Box::rotate(Vec3 rot)
+{
     glPushMatrix();
     glLoadMatrixf(this->matrix);
     glRotatef(rot.x, 1, 0, 0);

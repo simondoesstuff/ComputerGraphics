@@ -40,25 +40,29 @@ struct Polygon : public Drawable {
     Polygon operator-(Vec3 other);
     Polygon operator-(float scalar);
     Polygon reversed();
-    Polygon operator*(float scalar);
-    Polygon operator/(float scalar);
     Prism extrude(Vec3 extrusion);
     void draw();
     BoundingBox bounds();
 };
 
-class Prism : public Drawable {
+class Frustum : public Drawable {
     public:
-        Prism(Polygon base, Vec3 extrusion, Vec3 color);
-        Prism(Polygon base, Vec3 extrusion);
+        Frustum(Polygon base1, Polygon base2, Vec3 color);
+        Frustum(Polygon base, Polygon base2);
         int size();
-        Prism painted(std::vector<Vec3> colors);
-        Prism varigatePaint(float strength);
+        Frustum painted(std::vector<Vec3> colors);
+        Frustum varigatePaint(float strength);
         void draw();
         std::vector<Polygon> getPolygons();
         BoundingBox bounds();
     private:
         std::vector<Polygon> polygons;
+};
+
+class Prism : public Frustum {
+    public:
+        Prism(Polygon base, Vec3 extrusion, Vec3 color);
+        Prism(Polygon base, Vec3 extrusion);
 };
 
 class Box : public Drawable {
