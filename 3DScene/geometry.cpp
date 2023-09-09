@@ -131,9 +131,9 @@ Polygon Polygon::reversed()
     return Polygon(verticiesNext, color);
 }
 
-Prism Polygon::extrude(Vec3 extrusion)
+Prism* Polygon::extrude(Vec3 extrusion)
 {
-    return Prism(*this, extrusion);
+    return new Prism(*this, extrusion);
 }
 
 BoundingBox Polygon::bounds()
@@ -206,7 +206,7 @@ int Frustum::size()
     return polygons.size();
 }
 
-Frustum Frustum::painted(std::vector<Vec3> colors)
+Frustum* Frustum::painted(std::vector<Vec3> colors)
 {
     for (int i = 0; i < polygons.size(); i++)
     {
@@ -214,12 +214,12 @@ Frustum Frustum::painted(std::vector<Vec3> colors)
         polygons[i].color = color;
     }
 
-    return *this;
+    return this;
 }
 
 /// @brief Dim brightness slightly according to polygon index
 /// @param strength
-Frustum Frustum::varigatePaint(float strength)
+Frustum* Frustum::varigatePaint(float strength)
 {
     for (int i = 0; i < polygons.size(); i++)
     {
@@ -228,7 +228,7 @@ Frustum Frustum::varigatePaint(float strength)
         polygons[i].color = (color - strength) + brightness;
     }
 
-    return *this;
+    return this;
 }
 
 void Frustum::draw()
@@ -267,6 +267,11 @@ BoundingBox Frustum::bounds()
     return BoundingBox{min, max};
 }
 
+Box* Frustum::boxed()
+{
+    return new Box({this});
+}
+
 // --------- Prism --------- //
 
 Prism::Prism(Polygon base, Vec3 extrusion) : Frustum(base, base.reversed() + extrusion) {}
@@ -289,6 +294,14 @@ Box::Box(std::initializer_list<Drawable *> children)
         this->children.push_back(child);
     }
     this->identity();
+}
+
+Box::~Box()
+{
+    for (Drawable *child : children)
+    {
+        delete child;
+    }
 }
 
 void Box::identity()
@@ -336,8 +349,10 @@ void Box::draw()
     glPushMatrix();
 
     glMultMatrixf(this->matrix);
-    auto size = this->bounds().size();
-    glTranslatef(-size.x / 2, -size.y / 2, -size.z / 2);
+    
+    // center the box
+    // auto size = this->bounds().size();
+    // glTranslatef(-size.x / 2, -size.y / 2, -size.z / 2);
 
     for (Drawable *child : children)
     {
@@ -347,7 +362,7 @@ void Box::draw()
     glPopMatrix();
 }
 
-Box Box::scale(Vec3 scale)
+Box* Box::scale(Vec3 scale)
 {
     glPushMatrix();
     glLoadMatrixf(this->matrix);
@@ -355,10 +370,14 @@ Box Box::scale(Vec3 scale)
     glGetFloatv(GL_MODELVIEW_MATRIX, this->matrix);
     glPopMatrix();
     this->scaleFactor = this->scaleFactor.multComps(scale);
-    return *this;
+    return this;
 }
 
-Box Box::move(Vec3 pos)
+Box* Box::scale(float scale) {
+    return this->scale({scale, scale, scale});
+}
+
+Box* Box::move(Vec3 pos)
 {
     pos = pos.multComps(this->scaleFactor.reciprocal());
     glPushMatrix();
@@ -366,10 +385,10 @@ Box Box::move(Vec3 pos)
     glTranslatef(pos.x, pos.y, pos.z);
     glGetFloatv(GL_MODELVIEW_MATRIX, this->matrix);
     glPopMatrix();
-    return *this;
+    return this;
 }
 
-Box Box::rotate(Vec3 rot)
+Box* Box::rotate(Vec3 rot)
 {
     glPushMatrix();
     glLoadMatrixf(this->matrix);
@@ -378,5 +397,5 @@ Box Box::rotate(Vec3 rot)
     glRotatef(rot.z, 0, 0, 1);
     glGetFloatv(GL_MODELVIEW_MATRIX, this->matrix);
     glPopMatrix();
-    return *this;
+    return this;
 }

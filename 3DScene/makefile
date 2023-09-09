@@ -29,8 +29,8 @@ endif
 	g++ -c $(CFLG)  $< -std=c++11
 
 #  Link
-build:$(EXE).o  
-	g++ $(CFLG) -o $(EXE) $^  $(LIBS) -std=c++11
+build:
+	g++ $(CFLG) *.cpp models/*.cpp -o $(EXE) $(LIBS) -std=c++11
 
 #  Clean
 clean:

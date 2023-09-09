@@ -28,6 +28,7 @@ struct Drawable {
 };
 
 class Prism;
+class Box;
 
 struct Polygon : public Drawable {
     std::vector<Vec3> verticies;
@@ -40,7 +41,7 @@ struct Polygon : public Drawable {
     Polygon operator-(Vec3 other);
     Polygon operator-(float scalar);
     Polygon reversed();
-    Prism extrude(Vec3 extrusion);
+    Prism* extrude(Vec3 extrusion);
     void draw();
     BoundingBox bounds();
 };
@@ -50,11 +51,12 @@ class Frustum : public Drawable {
         Frustum(Polygon base1, Polygon base2, Vec3 color);
         Frustum(Polygon base, Polygon base2);
         int size();
-        Frustum painted(std::vector<Vec3> colors);
-        Frustum varigatePaint(float strength);
+        Frustum* painted(std::vector<Vec3> colors);
+        Frustum* varigatePaint(float strength);
         void draw();
         std::vector<Polygon> getPolygons();
         BoundingBox bounds();
+        Box* boxed();
     private:
         std::vector<Polygon> polygons;
 };
@@ -75,10 +77,13 @@ class Box : public Drawable {
         
         Box(std::vector<Drawable*> children);
         Box(std::initializer_list<Drawable*> children);
+        ~Box();
+
         void identity();
         BoundingBox bounds();
         void draw();
-        Box scale(Vec3 scale);
-        Box move(Vec3 pos);
-        Box rotate(Vec3 rot);
+        Box* scale(Vec3 scale);
+        Box* scale(float scale);
+        Box* move(Vec3 pos);
+        Box* rotate(Vec3 rot);
 };

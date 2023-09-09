@@ -22,8 +22,8 @@
 #define M_PI 3.14159265
 #endif
 
-#include "hsv2rgb.cpp"
-#include "geometry.cpp"
+#include "models/buff.h"
+// #include "geometry.h"
 
 struct orbit
 {
@@ -83,50 +83,24 @@ void draw()
    {
       // ----------------- Extrusion
 
-      // Vec3 c;
+      // auto cube = Polygon({
+      //                         {0, 0, 0},
+      //                         {1, 0, 0},
+      //                         {1, 0, 1},
+      //                         {0, 0, 1},
+      //                     },
+      //                     {.7, .7, 1})
+      //                 .extrude({0, 1, 0})
+      //                 .varigatePaint(.25);
 
-      // c = {.3, 1, .5};
-      // auto prism = Polygon({
-      //    {0, 0, 0},
-      //    {1, 0, 0},
-      //    {1, 0, 1},
-      //    {.3, 0, 1.3},
-      //    {0, 0, 1},
-      // }, c).extrude({.25, 1, .2});
-
-      // prism.varigatePaint(.25);
-      // prism.draw();
-
-      // c = {.9, .2, .8};
-      // prism = Polygon({
-      //    {0, 0, 0},
-      //    {0, 0, 1},
-      //    {0, 1, 1},
-      //    {0, 1, 0},
-      // }, c).extrude({2.5, 1, 0});
-
-      // glPushMatrix();
-      // prism.varigatePaint(.25);
-      // glScalef(.7, .7, .7);
-      // glTranslatef(0, 0, -.25);
-      // prism.draw();
-      // glPopMatrix();
-
-      auto cube = Polygon({
-                              {0, 0, 0},
-                              {1, 0, 0},
-                              {1, 0, 1},
-                              {0, 0, 1},
-                          },
-                          {.7, .7, 1})
-                      .extrude({0, 1, 0})
-                      .varigatePaint(.25);
-
-      Box({&cube})
-          .move({1, 0, 1})
-          .scale({.5, .5, .5})
-          .move({0, -.5, 0})
-          .draw();
+      // Box({&cube})
+      //     .move({1, 0, 1})
+      //     .scale({.5, .5, .5})
+      //     .move({0, -.5, 0})
+      //     .draw();
+      
+      auto buff = buildBuff();
+      buff.draw();
    }
 
    glutSwapBuffers();
@@ -148,7 +122,7 @@ void reshape(int width, int height)
    //  Undo previous transformations
    glLoadIdentity();
    //  Orthogonal projection
-   const double dim = 3;
+   const double dim = 8;
    double asp = (height > 0) ? (double)width / height : 1;
    glOrtho(-asp * dim, +asp * dim, -dim, +dim, -dim, +dim * 2);
    //  Switch to manipulating the model matrix
