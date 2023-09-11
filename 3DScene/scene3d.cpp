@@ -30,7 +30,10 @@ struct orbit
    float pitch = 0;
    float yaw = 0;
    const float speed = 10;
+   const float dim = 15;
 } orbit;
+
+Box *scene;
 
 #define LEN 8192 //  Maximum length of text string
 void Print(const char *format, ...)
@@ -80,29 +83,7 @@ void draw()
       Print("Z");
    }
 
-   {
-      // ----------------- Extrusion
-
-      // auto cube = Polygon({
-      //                         {0, 0, 0},
-      //                         {1, 0, 0},
-      //                         {1, 0, 1},
-      //                         {0, 0, 1},
-      //                     },
-      //                     {.7, .7, 1})
-      //                 .extrude({0, 1, 0})
-      //                 .varigatePaint(.25);
-
-      // Box({&cube})
-      //     .move({1, 0, 1})
-      //     .scale({.5, .5, .5})
-      //     .move({0, -.5, 0})
-      //     .draw();
-      
-      auto buff = buildBuff();
-      buff.draw();
-   }
-
+   scene->draw();
    glutSwapBuffers();
    glFlush();
 }
@@ -122,7 +103,7 @@ void reshape(int width, int height)
    //  Undo previous transformations
    glLoadIdentity();
    //  Orthogonal projection
-   const double dim = 8;
+   const double dim = orbit.dim;
    double asp = (height > 0) ? (double)width / height : 1;
    glOrtho(-asp * dim, +asp * dim, -dim, +dim, -dim, +dim * 2);
    //  Switch to manipulating the model matrix
@@ -175,6 +156,50 @@ void visible(int vis)
       glutIdleFunc(NULL);
 }
 
+void initScene()
+{
+   auto bgColor = Vec3{.4, .5, 1} / 4;
+   glClearColor(bgColor.x, bgColor.y, bgColor.z, 1);
+
+   auto mainBuff = buildBuff()
+                       ->rotate({0, (float)(rand() % 360), 0});
+
+   auto altBuff = buildBuff()
+                      ->scale(.4)
+                      ->move({2, -1.3, -4})
+                      ->rotate({0, (float)(rand() % 360) + 0, 0});
+
+   auto altBuff2 = buildBuff()
+                       ->scale(.4)
+                       ->move({6, -1.3, -6})
+                       ->rotate({0, (float)(rand() % 360) + 0, 0});
+
+   auto altBuff3 = buildBuff()
+                       ->scale(.4)
+                       ->move({-5, -1.3, -3})
+                       ->rotate({0, (float)(rand() % 360) + 0, 0});
+
+   auto altBuff4 = buildBuff()
+                       ->scale(.4)
+                       ->move({6, -1.3, 5})
+                       ->rotate({0, (float)(rand() % 360) + 0, 0});
+
+   auto floor = Polygon({
+                            {0, 0, 0},
+                            {0, 0, 1},
+                            {1, 0, 1},
+                            {1, 0, 0},
+                        },
+                        {.6, .8, 1})
+                    .extrude({0, -.1, 0})
+                    ->varigatePaint(.25)
+                    ->boxed()
+                    ->scale({16, 1, 16})
+                    ->move({-8, -2, -8});
+
+   scene = new Box({mainBuff, altBuff, altBuff2, altBuff3, altBuff4, floor});
+}
+
 int main(int argc, char *argv[])
 {
    //  Initialize GLUT and process user parameters
@@ -202,6 +227,8 @@ int main(int argc, char *argv[])
    glEnable(GL_CULL_FACE);
    glCullFace(GL_BACK);
    glFrontFace(GL_CCW);
+
+   initScene();
 
    glutDisplayFunc(draw);
    glutReshapeFunc(reshape);
