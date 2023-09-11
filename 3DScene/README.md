@@ -11,6 +11,16 @@ the openGL state machine.
 
 ![](./buff.gif)
 
+# Usage
+
+Pretty straight forward, non-interactive scene. Arrow keys
+to move.
+
+# Build
+
+Build with `make`. Run with `./scene3d` (unix).
+Alternatively, there is a *test* make directive `make test` which cleans, builds, and runs.
+
 # Time
 
 About 3 days
