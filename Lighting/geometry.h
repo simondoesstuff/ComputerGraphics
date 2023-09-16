@@ -1,5 +1,6 @@
 #include <vector>
 #include <initializer_list>
+#include "math.h"
 
 struct Vec3 {
     float x, y, z;

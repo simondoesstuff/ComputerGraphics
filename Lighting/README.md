@@ -16,5 +16,5 @@ more smooth lighting for my low-vertex objects.
 # Usage and Build
 
 *arrow keys* to orbit.  
-Use `make` to build and `./scene3d` to run. Or, `make run`.
+Use `make` to build and `./hw5` to run. Or, `make run`.
 

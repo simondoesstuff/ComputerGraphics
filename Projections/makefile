@@ -1,5 +1,5 @@
 # Example 8
-EXE=scene3d
+EXE=hw4
 
 # Main target
 all: build

@@ -32,7 +32,7 @@ struct control
    float walkSpeed = 3;
    float lookSpeed = 7;
    float orbitYaw = 0;
-   float orbitPitch = 0;
+   float orbitPitch = 10;
    int proj = 0; // 0,1,2 => ortho, prespective, first person
 } control;
 
@@ -92,55 +92,6 @@ void idle()
 {
 }
 
-void updateProjection(int newProj)
-{
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   switch (newProj)
-   {
-   case 0:
-   {
-      // Orthographic projection
-      const double dim = control.dim;
-      double asp = (glutGet(GLUT_WINDOW_HEIGHT) > 0) ? (double)glutGet(GLUT_WINDOW_WIDTH) / glutGet(GLUT_WINDOW_HEIGHT) : 1;
-      glOrtho(-asp * dim, +asp * dim, -dim, +dim, -dim, +dim * 2);
-      break;
-   }
-   default:
-      // Perspective projection
-      // (glu is not allowed, only able to use glFrustum)
-      glFrustum(-1, 1, -1, 1, 1, 100);
-      break;
-   }
-   glMatrixMode(GL_MODELVIEW);
-
-   if (newProj == control.proj)
-   {
-      return;
-   }
-
-   if (control.proj == 2)
-   {
-      // first person or left first person
-      glLoadIdentity();
-      glTranslatef(0, 0, -control.dim);
-      glRotatef(control.orbitPitch, 1, 0, 0);
-      glRotatef(control.orbitYaw, 0, 1, 0);
-   }
-
-   control.proj = newProj;
-}
-
-// -------- Window Reshape -------- //
-void reshape(int width, int height)
-{
-   //  Set the viewport to the entire window
-   glViewport(0, 0, RES * width, RES * height);
-   updateProjection(control.proj);
-   //  Undo previous transformations
-   glLoadIdentity();
-}
-
 void adjustLook(float angleX, float angleY, float angleZ)
 {
    if (control.proj != 2)
@@ -179,6 +130,57 @@ void adjustWalk(float dX, float dY)
    glTranslatef(dX, 0, dY);
    glMultMatrixf(matrix);
    glutPostRedisplay();
+}
+
+void updateProjection(int newProj)
+{
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+
+   double asp = (glutGet(GLUT_WINDOW_HEIGHT) > 0) ? (double)glutGet(GLUT_WINDOW_WIDTH) / glutGet(GLUT_WINDOW_HEIGHT) : 1;
+
+   switch (newProj)
+   {
+   case 0:
+   {
+      // Orthographic projection
+      const double dim = control.dim;
+      glOrtho(-asp * dim, +asp * dim, -dim, +dim, -dim, +dim * 2);
+      break;
+   }
+   default:
+      // Perspective projection
+      // (glu is not allowed, only able to use glFrustum)
+      glFrustum(-asp * .08, +asp * .08, -.08, +.08, .1, 1000);
+      break;
+   }
+
+   glMatrixMode(GL_MODELVIEW);
+   adjustLook(0, 0, 0);
+
+   if (newProj == control.proj)
+   {
+      return;
+   }
+
+   if (control.proj == 2)
+   {
+      // first person or left first person
+      glLoadIdentity();
+      glTranslatef(0, 0, -control.dim);
+      glRotatef(control.orbitPitch, 1, 0, 0);
+      glRotatef(control.orbitYaw, 0, 1, 0);
+   }
+
+   control.proj = newProj;
+}
+
+// -------- Window Reshape -------- //
+void reshape(int width, int height)
+{
+   //  Set the viewport to the entire window
+   glViewport(0, 0, RES * width, RES * height);
+   updateProjection(control.proj);
 }
 
 void key(unsigned char ch, int x, int y)
